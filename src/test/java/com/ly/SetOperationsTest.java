@@ -29,6 +29,7 @@ public class SetOperationsTest {
 
    @Test
     public  void  testSet(){
+        System.out.print("1111");
         opsForSet.add("opsForList:trim",1,2,3);
     }
 }
