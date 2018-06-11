@@ -1,14 +1,11 @@
 package com.ly;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +18,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ly.entity.Book;
 import com.ly.entity.User;
+/**
+ * 
+ * @author LY
+ *11
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath*:applicationContext.xml" })
 public class ListOperationsTest {
@@ -264,6 +266,145 @@ public class ListOperationsTest {
 		}
 		//输出结果3 333 1
 	}
-	
-	
+	/**
+	 * Long remove(K key, long count, Object value);
+	 *count > 0 : 从表头开始向表尾搜索，移除与 VALUE 相等的元素，数量为 COUNT 。
+	 *count < 0 : 从表尾开始向表头搜索，移除与 VALUE 相等的元素，数量为 COUNT 的绝对值。
+	 *count = 0 : 移除表中所有与 VALUE 相等的值。
+	 */
+	@Test
+	public void testRemove() {
+		opsForList.rightPush("opsForList:remove", 1);
+		opsForList.rightPush("opsForList:remove", 1);
+		opsForList.rightPush("opsForList:remove", 2);
+		opsForList.rightPush("opsForList:remove", 3);
+		opsForList.rightPush("opsForList:remove", 4);
+		opsForList.rightPush("opsForList:remove", 4);
+		opsForList.rightPush("opsForList:remove", 4);
+		opsForList.rightPush("opsForList:remove", 5);
+		opsForList.rightPush("opsForList:remove", 5);
+		opsForList.rightPush("opsForList:remove", 5);
+		opsForList.rightPush("opsForList:remove", 5);
+		System.out.println(opsForList.remove("opsForList:remove", 2, 1));//234445555
+		System.out.println(opsForList.remove("opsForList:remove", -3, 5));//234445
+		System.out.println(opsForList.remove("opsForList:remove", 0, 4));//235
+	}
+	/**
+	 * Redis Lindex 命令用于通过索引获取列表中的元素。你也可以使用负数下标，
+	 * 以 -1 表示列表的最后一个元素， -2 表示列表的倒数第二个元素，以此类推。
+	 * 从0起。。 
+	 */
+	@Test
+	public void testIndex() {
+		opsForList.rightPush("opsForList:index", 1);
+		opsForList.rightPush("opsForList:index", 1);
+		opsForList.rightPush("opsForList:index", 2);
+		opsForList.rightPush("opsForList:index", 3);
+		opsForList.rightPush("opsForList:index", 14);
+		opsForList.rightPush("opsForList:index", 12);
+		opsForList.rightPush("opsForList:index", 4);
+		System.out.println(opsForList.index("opsForList:index", -1)); //4
+		System.out.println(opsForList.index("opsForList:index", 3)); //3
+		System.out.println(opsForList.index("opsForList:index", 5)); //12
+	}
+	/**
+	 * V leftPop(K key);
+	 * 命令用于移除并返回列表的第一个元素
+	 */
+	@Test
+	public void testLeftPop() {
+		System.out.println(opsForList.leftPop("opsForList:leftPop"));//没找到就会出现Null
+		System.out.println(opsForList.rightPush("opsForList:leftPop", "123"));//1
+		System.out.println(opsForList.rightPush("opsForList:leftPop","1234"));//2
+		System.out.println(opsForList.leftPop("opsForList:leftPop"));//123
+		System.out.println(opsForList.range("opsForList:leftPop", 0, -1).get(0));//1234
+	}
+	/**
+	 * V rightPop(K key, long timeout, TimeUnit unit);
+	 * @throws InterruptedException 
+	 * Redis Blpop 命令移出并获取列表的第一个元素，
+	 *  如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。 
+	 */
+	@Test
+	public void testLeftPopForTimeOut() throws InterruptedException {
+		System.out.println(opsForList.rightPush("opsForList:leftPopForTimeOut", "123"));//1
+		System.out.println(opsForList.rightPush("opsForList:leftPopForTimeOut","1234"));//2
+		System.out.println(opsForList.leftPop("opsForList:leftPopForTimeOut",1,TimeUnit.SECONDS));
+		Thread.sleep(5000);
+		System.out.println(opsForList.size("opsForList:leftPopForTimeOut"));
+		Thread.sleep(5000);
+		System.out.println(opsForList.size("opsForList:leftPopForTimeOut"));
+	}
+	/**
+	 * V rightPop(K key);
+	 * 移除最后一个 并返回结果
+	 */
+	@Test
+	public void testRightPop() {
+		System.out.println(opsForList.rightPop("opsForList:rightPop"));//没找到就会出现Null
+		System.out.println(opsForList.rightPush("opsForList:rightPop", "123"));//1
+		System.out.println(opsForList.rightPush("opsForList:rightPop","1234"));//2
+		System.out.println(opsForList.rightPop("opsForList:rightPop"));//1234
+		System.out.println(opsForList.range("opsForList:rightPop", 0, -1).get(0));//123
+	}
+	/**
+	 * V rightPop(K key, long timeout, TimeUnit unit);
+	 * Redis Blpop 命令移出并获取列表的第一个元素，
+	 *  如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。 
+	 */
+	@Test
+	public void testRightPopForTimeOut() {
+		System.out.println(opsForList.rightPop("opsForList:rightPopForTimeOut"));//没找到就会出现Null
+		System.out.println(opsForList.rightPush("opsForList:rightPopForTimeOut", "123"));//1
+		System.out.println(opsForList.rightPush("opsForList:rightPopForTimeOut","1234"));//2
+		System.out.println(opsForList.rightPop("opsForList:rightPopForTimeOut",1,TimeUnit.SECONDS));//1234
+		System.out.println(opsForList.range("opsForList:rightPopForTimeOut", 0, -1).get(0));//123
+	}
+	/**
+	 * V rightPopAndLeftPush(K sourceKey, K destinationKey);
+	 * 列表中弹出一个值，将弹出的元素插入到另外一个列表中并返回它； 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止
+	 */
+	@Test
+	public void testRightPopAndLeftPush() {
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:right", "right1"));//1
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:right", "right2"));//2
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:right", "right3"));//3
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:left","left1"));//1
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:left","left2"));//2
+		System.out.println(opsForList.rightPush("opsForList:rightPopAndLeftPush:left","left3"));//3
+		System.out.println(opsForList.rightPopAndLeftPush("opsForList:rightPopAndLeftPush:left", "opsForList:rightPopAndLeftPush:right"));
+		//俩个key中的值 分别为 left :left1 left2 right:right1 right2 right3 left 3
+	}
+	/**
+	 * V rightPopAndLeftPush(K sourceKey, K destinationKey, long timeout, TimeUnit unit);
+	 * @throws InterruptedException  
+	 * 设置一个过期时间。在这时间中将被阻塞，如果超时未找到。就返回Null.
+	 */
+	@Test
+	public void testRightPopAndLeftPushForTimeOut() throws InterruptedException {
+		System.out.println(opsForList.rightPopAndLeftPush("opsForList:rightPopAndLeftPushTime:left", "opsForList:rightPopAndLeftPushTime:right",5,TimeUnit.SECONDS));
+		System.out.println("5秒后 opsForList:rightPopAndLeftPushTime:right "+opsForList.size("opsForList:rightPopAndLeftPushTime:right"));
+		
+		Runnable runnable1 = new Runnable() {
+		  public void run() {
+              for(int i = 0;i<10;i++){
+                  try {
+                      Thread.sleep(1000);
+                      if(i==7) {
+                    	  opsForList.rightPush("opsForList:rightPopAndLeftPushTime:left", "left1");
+                    	  return;
+                      }else {
+                    	  System.out.println("Runnable"+i);
+                      }
+                  } catch (InterruptedException e) {
+                      e.printStackTrace();
+                  }
+
+              }
+          }
+      };
+      Thread thread1 = new Thread(runnable1);
+      thread1.start();
+      System.out.println(opsForList.rightPopAndLeftPush("opsForList:rightPopAndLeftPushTime:left", "opsForList:rightPopAndLeftPushTime:right",10,TimeUnit.SECONDS));
+	}
 }
