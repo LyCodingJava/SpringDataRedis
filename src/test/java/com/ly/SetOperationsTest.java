@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,6 +26,14 @@ public class SetOperationsTest {
         opsForSet=redisTemplate.opsForSet();
     }
 
+  /**
+   * @MethodName testSet
+   * @Description //TODO 
+   * @Param []
+   * @return void
+   * @Author 刘洋
+   * @Date 21:08 2018/7/2
+   **/
    @Test
     public  void  testSet(){
         System.out.print("1111");
